@@ -47,4 +47,5 @@ if nombre_profe:
 
     # 5. HISTORIAL
     st.subheader("Historial de Clases")
+
     st.dataframe(profe_df[["Fecha", "Alumno", "Monto", "Horas"]], use_container_width=True)
