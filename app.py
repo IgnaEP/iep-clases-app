@@ -1,23 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-# Configuración de página
+# Configuración básica (Sin CSS externo para evitar errores)
 st.set_page_config(page_title="IEP Clases - NBA Dashboard", layout="centered", page_icon="🏀")
-
-# --- DISEÑO (Separado para evitar el TypeError) ---
-style = """
-<style>
-    .main { background-color: #f5f7f9; }
-    div[data-testid="metric-container"] {
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border: 1px solid #f0f2f6;
-    }
-</style>
-"""
-st.markdown(style, unsafe_allow_content_html=True)
 
 st.title("🏀 IEP Clases")
 st.subheader("Panel de Control del Staff")
@@ -34,6 +19,7 @@ def load_sheet(sheet_name):
     except:
         return None
 
+# Cargar tablas
 df_clases = load_sheet("Registro_Clases")
 df_profes = load_sheet("Profesores")
 
@@ -45,54 +31,65 @@ if df_clases is not None and df_profes is not None:
     if nombre_profe != "---":
         pin_ingresado = st.text_input("Introduce tu PIN de acceso:", type="password")
         
+        # Validar PIN
         fila_profe = df_profes[df_profes["Profesor"] == nombre_profe]
         pin_correcto = str(fila_profe["PIN"].values[0]).replace('.0', '').strip()
 
         if pin_ingresado.strip() == pin_correcto:
             st.balloons()
-            st.success(f"Hola {nombre_profe}, ¡buen trabajo esta semana!")
+            st.success(f"Hola {nombre_profe}, ¡bienvenido!")
             
-            # --- DATOS ---
+            # --- PROCESAMIENTO DE DATOS ---
             p_df = df_clases[df_clases["Profesor"] == nombre_profe].copy()
             
-            # Nombres exactos de tu Excel
+            # Nombres exactos de tu Excel (Captura 3184ba.png)
             col_neto = "Pago Neto Profe (55%)"
             col_escrow = "Fondo Escrow (5%)"
             col_horas = "Horas"
             col_estatus = "Estatus de Pago"
 
-            # Limpieza de números
+            # Limpiar columnas numéricas
             for col in [col_neto, col_escrow, col_horas]:
-                p_df[col] = pd.to_numeric(p_df[col], errors='coerce').fillna(0)
+                if col in p_df.columns:
+                    p_df[col] = pd.to_numeric(p_df[col], errors='coerce').fillna(0)
 
-            # Filtro de Pendientes (Vacío o que diga Pendiente)
-            mask_pendiente = (p_df[col_estatus].isna()) | (p_df[col_estatus].astype(str).str.strip() == "") | (p_df[col_estatus].astype(str).str.contains('Pendiente', case=False))
-            solo_pendientes = p_df[mask_pendiente]
-            
-            # Métricas
+            # Filtro de Pendientes (Captura ffb10a.png)
+            # Consideramos pendiente si la celda está vacía o no dice "Pagado"
+            if col_estatus in p_df.columns:
+                mask_pendiente = (p_df[col_estatus].isna()) | (p_df[col_estatus].astype(str).str.strip() == "") | (~p_df[col_estatus].astype(str).str.contains('Pagado', case=False))
+                solo_pendientes = p_df[mask_pendiente]
+            else:
+                solo_pendientes = p_df
+
+            # --- DASHBOARD ---
             col1, col2, col3 = st.columns(3)
-            col1.metric("A cobrar Lunes", f"${solo_pendientes[col_neto].sum():,.2f}")
-            col2.metric("Ahorro Escrow", f"${solo_pendientes[col_escrow].sum():,.2f}")
-            col3.metric("Horas Totales", f"{solo_pendientes[col_horas].sum()}h")
+            with col1:
+                st.metric("A cobrar Lunes", f"${solo_pendientes[col_neto].sum():,.2f}")
+            with col2:
+                st.metric("Ahorro Escrow", f"${solo_pendientes[col_escrow].sum():,.2f}")
+            with col3:
+                st.metric("Horas Totales", f"{solo_pendientes[col_horas].sum()}h")
 
             st.divider()
             st.subheader("📖 Tu Historial Reciente")
-            columnas_reales = [c for c in ["Fecha", "Alumno", "Horas", col_neto, col_estatus] if c in p_df.columns]
+            
+            # Mostrar tabla (Captura 3184ba.png)
+            columnas_mostrar = ["Fecha", "Alumno", "Horas", col_neto, col_estatus]
+            columnas_reales = [c for c in columnas_mostrar if c in p_df.columns]
             st.dataframe(p_df[columnas_reales].tail(10), use_container_width=True)
 
             st.divider()
-            # Botón de Registro
-            url_form = "TU_LINK_AQUI" 
-            st.link_button("📝 Registrar Nueva Clase", url_form, use_container_width=True, type="primary")
+            # Botón de Registro (Simple y directo)
+            url_form = "TU_LINK_DE_FORMULARIO_AQUÍ" 
+            st.link_button("➕ Registrar Nueva Clase", url_form, use_container_width=True, type="primary")
             
         elif pin_ingresado != "":
             st.error("PIN incorrecto. Revisa tus datos.")
 else:
-    st.error("Error de conexión. Intenta refrescar la página.")
+    st.error("Error de conexión. Verifica que el Excel sea público y las pestañas existan.")
 
 # Sincronización en la barra lateral
-if st.sidebar.button("🔄 Sincronizar Datos"):
-    st.cache_data.clear()
-    st.rerun()
-
-
+with st.sidebar:
+    if st.button("🔄 Sincronizar Datos"):
+        st.cache_data.clear()
+        st.rerun()
