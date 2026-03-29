@@ -81,3 +81,30 @@ if df_profes is not None:
             st.error("PIN incorrecto.")
 else:
     st.error("No se pudo leer la pestaña 'Profesores'. ¿La creaste con ese nombre exacto?")
+# --- BUSCAMOS DATOS Y DASHBOARD (Esto ya lo tienes) ---
+        # ... (debajo del historial de clases, añade esto):
+
+        st.divider()
+        st.subheader("📝 Gestión de Clases")
+        
+        # Reemplaza el link de abajo por el link de tu formulario de Google
+        url_formulario = "TU_LINK_DE_GOOGLE_FORM_AQUI"
+        
+        st.markdown(f"""
+            <a href="{url_formulario}" target="_blank">
+                <button style="
+                    width: 100%;
+                    background-color: #f63366;
+                    color: white;
+                    padding: 15px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 18px;
+                    cursor: pointer;
+                    font-weight: bold;">
+                    ➕ Registrar Nueva Clase
+                </button>
+            </a>
+        """, unsafe_allow_content_html=True)
+        
+        st.info("Al terminar de registrar en el formulario, refresca esta página para ver tus números actualizados.")
