@@ -53,7 +53,7 @@ if df_clases is not None and df_profes is not None:
             st.divider()
             st.subheader("📝 Gestión de Clases")
             
-            url_form = "TU_LINK_DE_GOOGLE_FORM_AQUI" # <--- PEGA TU LINK ACÁ
+            url_form = "https://docs.google.com/forms/d/e/1FAIpQLSfjvI1e0--e36nmtT8gNQy1kT_fzG7LQP_ZsrLu0AKcuJ7NvQ/viewform?usp=header" # <--- PEGA TU LINK ACÁ
             
             # Usamos un link de Streamlit nativo que es más seguro
             st.link_button("➕ Registrar Nueva Clase", url_form, use_container_width=True, type="primary")
@@ -68,4 +68,5 @@ else:
 if st.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
+
 
