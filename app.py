@@ -80,7 +80,7 @@ if df_clases is not None and df_profes is not None:
 
             st.divider()
             # Botón de Registro (Simple y directo)
-            url_form = "TU_LINK_DE_FORMULARIO_AQUÍ" 
+            url_form = "https://docs.google.com/forms/d/e/1FAIpQLSfjvI1e0--e36nmtT8gNQy1kT_fzG7LQP_ZsrLu0AKcuJ7NvQ/viewform?usp=header" 
             st.link_button("➕ Registrar Nueva Clase", url_form, use_container_width=True, type="primary")
             
         elif pin_ingresado != "":
